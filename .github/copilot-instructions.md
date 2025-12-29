@@ -26,7 +26,9 @@ const context = await esbuild.context({
 
 ### 環境構築
 
-- Obsidian のプラグインフォルダ `obsidian_hadocommun/.obsidian/plugins/hadocommun-plugin/` を作成すること
+- プラグイン開発ディレクトリ: `plugin/`
+- ドキュメント・vault ディレクトリ: `docs/`
+- プラグインインストール先: `docs/.obsidian/plugins/hadocommun-plugin/`
 - TypeScript での開発
 - esbuild を利用したビルド
 
