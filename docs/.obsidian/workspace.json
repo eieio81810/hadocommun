@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "c5a46b21c5bbdd0e",
+        "id": "6537683f37cda4de",
         "type": "tabs",
         "children": [
           {
-            "id": "fe559161808e64ff",
+            "id": "716354b93d885e8d",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -24,15 +24,17 @@
         ]
       },
       {
-        "id": "2c0e071aa1e28621",
+        "id": "f5ea20e03588be76",
         "type": "tabs",
         "children": [
           {
-            "id": "926c0b67611b82af",
+            "id": "099ffc4b130f29c4",
             "type": "leaf",
+            "pinned": true,
             "state": {
               "type": "graph",
               "state": {},
+              "pinned": true,
               "icon": "lucide-git-fork",
               "title": "グラフビュー"
             }
@@ -110,17 +112,16 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Welcome.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
                 "showSearch": false,
                 "searchQuery": "",
                 "backlinkCollapsed": false,
-                "unlinkedCollapsed": true
+                "unlinkedCollapsed": false
               },
               "icon": "links-coming-in",
-              "title": "Welcomeへのバックリンク"
+              "title": "バックリンク"
             }
           },
           {
@@ -129,12 +130,11 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Welcome.md",
                 "linksCollapsed": false,
-                "unlinkedCollapsed": true
+                "unlinkedCollapsed": false
               },
               "icon": "links-going-out",
-              "title": "Welcomeからのアウトゴーイングリンク"
+              "title": "アウトゴーイングリンク"
             }
           },
           {
@@ -185,22 +185,30 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "left-ribbon": {
     "hiddenItems": {
+      "hadocommun-plugin:Hadocommun Plugin": false,
       "switcher:クイックスイッチャーを開く": false,
       "graph:グラフビューを開く": false,
       "canvas:新規キャンバスを作成": false,
       "daily-notes:今日のデイリーノートを開く": false,
       "templates:テンプレートを挿入": false,
       "command-palette:コマンドパレットを開く": false,
-      "bases:Create new base": false
+      "bases:Create new base": false,
+      "markdown-importer:Markdownインポーターを開く": false,
+      "random-note:ランダムノートを開く": false
     }
   },
-  "active": "926c0b67611b82af",
+  "active": "099ffc4b130f29c4",
   "lastOpenFiles": [
-    "Welcome.md"
+    "Welcome.md",
+    "Markdown_knowhow.md",
+    "Setting_for_windows_user.md",
+    "Contributing.md",
+    "無題のファイル.md",
+    "2025-12-28.md",
+    "無題のファイル.base"
   ]
 }
