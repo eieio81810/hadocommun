@@ -6,9 +6,6 @@ dist/
 *.js
 *.js.map
 
-# Dependencies
-package-lock.json
-
 # IDE
 .vscode/
 .idea/
