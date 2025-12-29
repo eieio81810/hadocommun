@@ -1,0 +1,18 @@
+# Node modules
+node_modules/
+
+# Build output
+main.js
+main.js.map
+*.js.map
+
+# Dependencies
+package-lock.json
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

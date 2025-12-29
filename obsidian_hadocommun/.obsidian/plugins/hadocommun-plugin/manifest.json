@@ -1,0 +1,10 @@
+{
+  "id": "hadocommun-plugin",
+  "name": "Hadocommun Plugin",
+  "version": "1.1.0",
+  "minAppVersion": "0.15.0",
+  "description": "A plugin for Hadocommun community features",
+  "author": "Hadocommun",
+  "authorUrl": "https://github.com/eieio81810/hadocommun",
+  "isDesktopOnly": false
+}
