@@ -1,10 +1,10 @@
-# ハドこみゅドキュメント
+# ハドこみゅdocs説明書
 
 このディレクトリは、ハドこみゅプロジェクトのドキュメントおよびObsidian vaultを含んでいます。
 
 ## コンテンツ
 
-- **Welcome.md** - ハドこみゅの紹介とコミュニティ情報
+- **[[Welcome|Welcome.md]]** - ハドこみゅの紹介とコミュニティ情報
 - **Markdown_knowhow.md** - Markdownの書き方ガイド
 - **.obsidian/** - Obsidian vault設定
 
