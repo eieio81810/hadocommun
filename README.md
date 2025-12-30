@@ -1,8 +1,8 @@
-# hadocommun
+# Hadocommun
 
-HADOコミュニティ「ハドこみゅ」のオープンソースプロジェクト
+HADOコミュニティ「ハドこみゅ」のObsidianプラグイン
 
-このリポジトリは、Obsidianドキュメント（vault）とObsidianプラグインのモノレポです。
+このプラグインは、グラフビューでの情報をより読みやすくするために、ファイル名の代わりにH1見出しをノードラベルとして表示します。
 
 ---
 
@@ -12,89 +12,131 @@ For English documentation, see [README_EN.md](README_EN.md).
 
 ---
 
-## 📁 プロジェクト構造
+## 🌟 機能
 
-```
-hadocommun/
-├── README.md                    # このファイル（プロジェクト全体の説明）
-├── README_EN.md                 # English version
-├── LICENSE                      # MITライセンス
-├── .github/
-│   └── copilot-instructions.md # GitHub Copilotの指示書
-├── plugin/                      # プラグイン開発用ディレクトリ
-│   ├── README.md               # プラグイン開発ガイド
-│   ├── src/                    # ビジネスロジック（テスト可能）
-│   ├── tests/                  # Jestテスト
-│   ├── main.ts                 # プラグインエントリーポイント
-│   ├── manifest.json           # プラグインマニフェスト
-│   ├── package.json            # 依存関係とビルドスクリプト
-│   ├── jest.config.js          # Jestテスト設定
-│   ├── tsconfig.json           # TypeScript設定
-│   ├── esbuild.config.mjs      # ビルド設定
-│   └── .gitignore              # ビルド成果物の除外
-└── docs/                        # ドキュメント・Obsidian vault
-    ├── Welcome.md              # ハドこみゅの紹介
-    ├── Contributing.md         # 寄稿ガイド
-    ├── Plugin_Development_Guide.md  # プラグイン開発ガイド
-    ├── Plugin_Release_Guide.md      # プラグインリリースガイド
-    ├── Markdown_knowhow.md     # Markdownガイド
-    └── .obsidian/              # Obsidian vault設定
-        └── plugins/            # プラグインインストール先
-```
+- **H1をグラフラベルに**: 各ノートの最初のH1見出しを自動的にグラフビューのラベルとして表示
+- **リアルタイム更新**: ファイルが変更されるとラベルが自動的に更新
+- **パフォーマンス最適化**: Obsidianのメタデータキャッシュを使用して迅速に取得（ファイルコンテンツへのフォールバック付き）
+- **簡単トグル**: シンプルな設定で機能の有効/無効を切り替え
+- **UTF-8対応**: 日本語、中国語、韓国語などの言語でシームレスに動作
 
-## 🚀 クイックスタート
+## 📸 スクリーンショット
 
-### ドキュメントを閲覧
+### 変更前（ファイル名）
 
-1. [Obsidian](https://obsidian.md/) をインストール
-2. `docs/` ディレクトリをvaultとして開く
+![[before.png]]
 
-### プラグイン開発
+
+### 変更後（H1見出し）
+
+![[after.png]]
+
+> **注:** これらのプレースホルダーは、プラグインの実際の動作画面のスクリーンショットに差し替えてください。
+
+## 🚀 インストール
+
+### Obsidianコミュニティプラグインからのインストール（推奨）
+
+1. Obsidianの設定を開く
+2. **コミュニティプラグイン** に移動
+3. **ブラウズ** をクリックし、「Hadocommun」を検索
+4. **インストール** をクリック
+5. プラグインを有効にする
+
+### 手動インストール
+
+1. [最新リリース](https://github.com/eieio81810/hadocommun/releases/latest) から `main.js` と `manifest.json` をダウンロード
+2. ボールトの `.obsidian/plugins/` ディレクトリに `hadocommun` というフォルダを作成
+3. ダウンロードしたファイルを `hadocommun` フォルダに配置
+4. Obsidianをリロード
+5. 設定 → コミュニティプラグイン でプラグインを有効にする
+
+## 📖 使い方
+
+1. Obsidianの設定を開く
+2. **Hadocommun** セクションに移動
+3. **「グラフノードのラベルにH1を使用」** を有効にする
+4. グラフビューを開く（Ctrl/Cmd + G）
+5. ノードラベルがファイル名の代わりにH1見出しを表示するようになります
+
+### 動作原理
+
+- プラグインは各ノートの最初のH1見出し（`# 見出し`）を抽出します
+- ノートにH1見出しがある場合、グラフビューでのラベルとして使用されます
+- H1見出しが見つからない場合は、元のファイル名が表示されます
+- ファイルを編集するとラベルが自動的に更新されます
+
+### ヒント
+
+- より良いグラフの読みやすさのために、説明的なH1見出しを使用してください
+- 設定はObsidianを再起動せずにオン/オフを切り替え可能です
+- グローバルおよびローカルのグラフビューの両方で動作します
+
+## 🛠️ 開発
+
+このプラグインはテスト駆動開発（TDD）方式で開発されています。
+
+### セットアップ
 
 ```bash
-cd plugin
-npm install        # 依存関係をインストール
-npm run dev        # 開発モード（自動リビルド）
-npm test           # テスト実行
-npm run build      # 本番ビルド
+git clone https://github.com/eieio81810/hadocommun.git
+cd hadocommun/plugin
+npm install
 ```
 
-詳細は以下を参照：
-- [plugin/README.md](plugin/README.md) - プラグイン開発手順
-- [docs/Plugin_Development_Guide.md](docs/Plugin_Development_Guide.md) - 開発ガイド
-- [docs/Plugin_Release_Guide.md](docs/Plugin_Release_Guide.md) - リリース手順
+### ビルド
 
-## 📝 エンコーディングについて
+```bash
+npm run dev    # 自動リビルド付き開発モード
+npm run build  # 本番ビルド
+```
 
-- すべてのファイルは **UTF-8（BOMなし）** で保存してください
-- 特に日本語を含むファイルは文字化けに注意
-- 詳細は [.github/copilot-instructions.md](.github/copilot-instructions.md) を参照
+### テスト
 
-## 🧪 テスト駆動開発（TDD）
+```bash
+npm test              # すべてのテストを実行
+npm run test:watch    # ウォッチモード
+npm run test:coverage # カバレッジレポート
+```
 
-このプラグインはテスト駆動開発を採用しています。
-
-**Red → Green → Refactor** サイクル：
-1. **Red**: 失敗するテストを書く
-2. **Green**: 最小限の実装でテストを通す
-3. **Refactor**: テストを保ちながらコードを改善
-
-詳細は [docs/Plugin_Development_Guide.md](docs/Plugin_Development_Guide.md) を参照。
+詳細については、[plugin/README.md](plugin/README.md) および [docs/Plugin_Development_Guide.md](docs/Plugin_Development_Guide.md) を参照してください。
 
 ## 🤝 コントリビューション
 
-プルリクエストやIssueは大歓迎です！
+コントリビューション大歓迎です！プルリクエストをお気軽にご提出ください。
 
-### ドキュメント寄稿
+1. リポジトリをフォーク
+2. フィーチャーブランチを作成 (`git checkout -b feature/awesome-feature`)
+3. まずテストを書く（TDDアプローチ）
+4. 機能を実装
+5. 変更をコミット (`git commit -m 'Add awesome feature'`)
+6. ブランチにプッシュ (`git push origin feature/awesome-feature`)
+7. プルリクエストを作成
 
-HADOの技術・戦術などのノートを追加・編集します。  
-→ [docs/Contributing.md](docs/Contributing.md)
-
-### プラグイン開発
-
-Obsidianプラグインの機能追加・改善を行います。  
-→ [docs/Plugin_Development_Guide.md](docs/Plugin_Development_Guide.md)
+コントリビューションガイドラインについては、[docs/Contributing.md](docs/Contributing.md) を参照してください。
 
 ## 📄 ライセンス
 
 MIT License - 詳細は [LICENSE](LICENSE) を参照
+
+## 🙏 感謝
+
+- グラフビューのカスタマイズ技術に関して [Graph-Link-Types](https://github.com/natefrisch01/Graph-Link-Types) プラグインにインスパイアを受けました
+- [Obsidian API](https://github.com/obsidianmd/obsidian-api) を使用して構築
+- フィードバックとサポートをいただいたObsidianコミュニティに感謝
+
+## 📞 サポート
+
+- **Issues**: [GitHub Issues](https://github.com/eieio81810/hadocommun/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/eieio81810/hadocommun/discussions)
+- **Discord**: [Hadocommun Discord](https://discord.gg/GDBTSf7bhZ)
+
+## 🔗 リンク
+
+- [GitHubリポジトリ](https://github.com/eieio81810/hadocommun)
+- [リリースノート](https://github.com/eieio81810/hadocommun/releases)
+- [プラグインガイドライン](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines)
+
+---
+
+❤️で作成された [Hadocommun](https://github.com/eieio81810) コミュニティ

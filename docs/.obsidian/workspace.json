@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Setting_for_windows_user.md",
+                "file": "PR_Submission_Checklist.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Setting_for_windows_user"
+              "title": "PR_Submission_Checklist"
             }
           }
         ]
@@ -203,10 +203,11 @@
   },
   "active": "dcaed19ac201ac32",
   "lastOpenFiles": [
+    "PR_Submission_Checklist.md",
+    "Plugin_Release_Guide.md",
     "Setting_for_windows_user.md",
     "Contributing.md",
     "Welcome.md",
-    "Plugin_Release_Guide.md",
     "README.md",
     "Markdown_knowhow.md",
     "Plugin_Development_Guide.md",

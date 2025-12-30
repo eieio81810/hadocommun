@@ -366,3 +366,23 @@ Add Hadocommun Plugin
 - [ ] **プラグイン名に "Plugin" という単語を含まない**
 - [ ] **説明文の末尾に句読点 (.?!) がある**
 - [ ] **manifest.json がリポジトリルートに存在**
+
+## ✅ 完了したら
+
+- [ ] NOTICES.md 生成完了（`npm run generate-notices`）
+- [ ] manifest.json をルートディレクトリに配置
+- [ ] プラグイン ID と Name が命名規則に準拠
+- [ ] README.md が英語で書かれている
+- [ ] GitHub Release 作成完了
+- [ ] obsidian-releases に PR 送信完了
+- [ ] **PR テンプレートをすべて記入** → [[PR_Submission_Checklist|提出チェックリスト]]
+- [ ] レビュー対応完了
+- [ ] プラグイン公開完了 🎉
+
+公開後は Discord で報告し、コミュニティに共有しましょう！
+
+詳細な提出チェックリストは [[PR_Submission_Checklist|こちら]] を参照してください。
+
+---
+
+[[Plugin_Development_Guide|開発ガイドに戻る]]
