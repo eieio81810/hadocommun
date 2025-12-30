@@ -42,4 +42,8 @@ export class GraphLabelManager {
 	clearCache() {
 		this.h1Cache.clear();
 	}
+
+	invalidateFileCache(nodeId: string) {
+		this.h1Cache.delete(nodeId);
+	}
 }

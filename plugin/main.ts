@@ -59,6 +59,25 @@ export default class HadocommunPlugin extends Plugin {
 			})
 		);
 
+		// ファイル変更時にキャッシュを無効化
+		this.registerEvent(
+			this.app.vault.on('modify', (file) => {
+				if (file instanceof TFile && file.extension === 'md') {
+					this.labelManager.invalidateFileCache(file.path);
+				}
+			})
+		);
+
+		// ファイルリネーム時にキャッシュを無効化
+		this.registerEvent(
+			this.app.vault.on('rename', (file, oldPath) => {
+				if (file instanceof TFile && file.extension === 'md') {
+					this.labelManager.invalidateFileCache(oldPath);
+					this.labelManager.invalidateFileCache(file.path);
+				}
+			})
+		);
+
 		console.log('Hadocommun Plugin loaded');
 	}
 

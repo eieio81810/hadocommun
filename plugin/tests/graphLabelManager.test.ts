@@ -104,4 +104,30 @@ describe('GraphLabelManager', () => {
 			expect(mockResolveFile).toHaveBeenCalledTimes(2);
 		});
 	});
+
+	describe('invalidateFileCache', () => {
+		it('should invalidate cache for a specific file', async () => {
+			const mockFile = { path: 'test.md' } as TFile;
+			const mockResolveFile = jest.fn().mockReturnValue(mockFile);
+			(mockMetadataCache.getFileCache as jest.Mock).mockReturnValue({
+				headings: [{ level: 1, heading: 'Old Title' }],
+			});
+
+			// 初回キャッシュ
+			await manager.getH1ForNode('test.md', mockResolveFile);
+			expect(mockResolveFile).toHaveBeenCalledTimes(1);
+
+			// 特定ファイルのキャッシュを無効化
+			manager.invalidateFileCache('test.md');
+
+			// 新しいタイトルで再取得
+			(mockMetadataCache.getFileCache as jest.Mock).mockReturnValue({
+				headings: [{ level: 1, heading: 'New Title' }],
+			});
+
+			const result = await manager.getH1ForNode('test.md', mockResolveFile);
+			expect(result).toBe('New Title');
+			expect(mockResolveFile).toHaveBeenCalledTimes(2);
+		});
+	});
 });
