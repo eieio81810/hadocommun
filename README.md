@@ -24,12 +24,12 @@ For English documentation, see [README_EN.md](README_EN.md).
 
 ### 変更前（ファイル名）
 
-![[before.png]]
+![before.png](https://github.com/eieio81810/hadocommun/blob/main/before.png)
 
 
 ### 変更後（H1見出し）
 
-![[after.png]]
+![after.png](https://github.com/eieio81810/hadocommun/blob/main/after.png)
 
 > **注:** これらのプレースホルダーは、プラグインの実際の動作画面のスクリーンショットに差し替えてください。
 
