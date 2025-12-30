@@ -47,6 +47,7 @@
 - **ID**: "plugin" という単語を含めない（短く簡潔に）
 - **Name**: "Plugin" という単語を含めない（冗長なため）
 - **Description**: 末尾に `.?!)` のいずれかを付ける
+- **authorUrl**: 作者のGitHubプロフィールまたは公式サイト（⚠️ プラグインのリポジトリURLは不可）
 
 ```json
 {
@@ -56,7 +57,7 @@
   "minAppVersion": "0.15.0",
   "description": "Display H1 headings as graph node labels instead of file names.",
   "author": "Hadocommun",
-  "authorUrl": "https://github.com/eieio81810/hadocommun",
+  "authorUrl": "https://github.com/eieio81810",
   "isDesktopOnly": false
 }
 ```
@@ -66,7 +67,8 @@
 {
   "id": "hadocommun-plugin",        // ❌ "plugin" を含めない
   "name": "Hadocommun Plugin",      // ❌ "Plugin" を含めない
-  "description": "Display H1 headings"  // ❌ 末尾に句読点がない
+  "description": "Display H1 headings",  // ❌ 末尾に句読点がない
+  "authorUrl": "https://github.com/eieio81810/hadocommun"  // ❌ リポジトリURLは不可
 }
 ```
 
@@ -351,37 +353,16 @@ Add Hadocommun Plugin
 2. 両方のファイルが同一の内容であることを確認
 3. Git にコミットしてプッシュ
 
-### PR テンプレートの記入
+#### エラー7: "The authorUrl field should not point to the plugin repository"
+**原因:** `manifest.json` の `authorUrl` がプラグインのリポジトリURLを指している
 
-- [ ] プラグイン名とIDが一致
-- [ ] 最新バージョンが正しく設定
-- [ ] **GitHub Release が作成済み**
-- [ ] **manifest.json のバージョンとリリースタグが一致**
-- [ ] リリースにファイルが添付されている
-- [ ] README が英語で書かれている
-- [ ] ライセンスが明記されている
-- [ ] NOTICES.md にサードパーティライセンスを記載
-- [ ] **community-plugins.json の最後に追加**
-- [ ] **プラグインID に "plugin" という単語を含まない**
-- [ ] **プラグイン名に "Plugin" という単語を含まない**
-- [ ] **説明文の末尾に句読点 (.?!) がある**
-- [ ] **manifest.json がリポジトリルートに存在**
-
-## ✅ 完了したら
-
-- [ ] NOTICES.md 生成完了（`npm run generate-notices`）
-- [ ] manifest.json をルートディレクトリに配置
-- [ ] プラグイン ID と Name が命名規則に準拠
-- [ ] README.md が英語で書かれている
-- [ ] GitHub Release 作成完了
-- [ ] obsidian-releases に PR 送信完了
-- [ ] **PR テンプレートをすべて記入** → [[PR_Submission_Checklist|提出チェックリスト]]
-- [ ] レビュー対応完了
-- [ ] プラグイン公開完了 🎉
-
-公開後は Discord で報告し、コミュニティに共有しましょう！
-
-詳細な提出チェックリストは [[PR_Submission_Checklist|こちら]] を参照してください。
+**対処法:**
+1. `manifest.json` (ルートとplugin/ の両方) を開く
+2. `authorUrl` を作者のGitHubプロフィールまたは公式サイトに変更
+3. 例:
+   - ❌ `"authorUrl": "https://github.com/eieio81810/hadocommun"` (リポジトリURL)
+   - ✅ `"authorUrl": "https://github.com/eieio81810"` (プロフィールURL)
+4. 両方のファイルを更新してコミット
 
 ---
 

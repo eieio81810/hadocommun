@@ -70,7 +70,7 @@ Link to my plugin: https://github.com/eieio81810/hadocommun
   "minAppVersion": "0.15.0",
   "description": "Display H1 headings as graph node labels instead of file names.",
   "author": "Hadocommun",
-  "authorUrl": "https://github.com/eieio81810/hadocommun",
+  "authorUrl": "https://github.com/eieio81810",
   "isDesktopOnly": false
 }
 ```
@@ -79,6 +79,7 @@ Link to my plugin: https://github.com/eieio81810/hadocommun
 - ✅ ID に "plugin" という単語を含まない
 - ✅ Name に "Plugin" という単語を含まない
 - ✅ Description の末尾に `.` がある
+- ✅ authorUrl は作者のプロフィールURL（プラグインのリポジトリURLではない）
 
 ### 2. GitHub Release
 
@@ -128,19 +129,20 @@ Link to my plugin: https://github.com/eieio81810/hadocommun
 
 ## Repo URL
 
-Link to my plugin: https://github.com/eieio81810/hadocommun
+<!--- Paste a link to your repo here for easy access -->
+Link to my plugin:https://github.com/eieio81810/hadocommun
 
 ## Release Checklist
 - [x] I have tested the plugin on
-  - [x] Windows
-  - [x] macOS
-  - [ ] Linux
-  - [ ] Android _(not tested yet, but isDesktopOnly: false)_
-  - [ ] iOS _(not tested yet, but isDesktopOnly: false)_
+  - [x]  Windows
+  - [x]  macOS
+  - [x]  Linux
+  - [ ]  Android _(if applicable)_
+  - [ ]  iOS _(if applicable)_
 - [x] My GitHub release contains all required files (as individual files, not just in the source.zip / source.tar.gz)
   - [x] `main.js`
   - [x] `manifest.json`
-  - [ ] `styles.css` _(not using custom styles)_
+  - [ ] `styles.css` _(optional)_
 - [x] GitHub release name matches the exact version number specified in my manifest.json (_**Note:** Use the exact version number, don't include a prefix `v`_)
 - [x] The `id` in my `manifest.json` matches the `id` in the `community-plugins.json` file.
 - [x] My README.md describes the plugin's purpose and provides clear usage instructions.
@@ -148,7 +150,7 @@ Link to my plugin: https://github.com/eieio81810/hadocommun
 - [x] I have read the tips in https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines and have self-reviewed my plugin to avoid these common pitfalls.
 - [x] I have added a license in the LICENSE file.
 - [x] My project respects and is compatible with the original license of any code from other plugins that I'm using.
-      I have given proper attribution to these other projects in my `NOTICES.md`.
+      I have given proper attribution to these other projects in my `README.md`.
 ```
 
 ---
@@ -178,6 +180,13 @@ Link to my plugin: https://github.com/eieio81810/hadocommun
 ### エラー6: "You don't have a manifest.json at the root"
 - **原因:** リポジトリルートに manifest.json がない
 - **対処:** `plugin/manifest.json` をルートにコピー
+
+### エラー7: "The authorUrl field should not point to the plugin repository"
+- **原因:** `authorUrl` がプラグインのリポジトリURLを指している
+- **対処:** 作者のGitHubプロフィール（例: `https://github.com/username`）または公式サイトに変更
+- **例:**
+  - ❌ `"authorUrl": "https://github.com/eieio81810/hadocommun"`
+  - ✅ `"authorUrl": "https://github.com/eieio81810"`
 
 ---
 
