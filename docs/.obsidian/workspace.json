@@ -13,22 +13,22 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Welcome.md",
+                "file": "Setting_for_windows_user.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Welcome"
+              "title": "Setting_for_windows_user"
             }
           }
         ]
       },
       {
-        "id": "f5ea20e03588be76",
+        "id": "601cdb5916268824",
         "type": "tabs",
         "children": [
           {
-            "id": "099ffc4b130f29c4",
+            "id": "dcaed19ac201ac32",
             "type": "leaf",
             "pinned": true,
             "state": {
@@ -201,12 +201,15 @@
       "random-note:ランダムノートを開く": false
     }
   },
-  "active": "099ffc4b130f29c4",
+  "active": "dcaed19ac201ac32",
   "lastOpenFiles": [
-    "Welcome.md",
-    "Markdown_knowhow.md",
     "Setting_for_windows_user.md",
     "Contributing.md",
+    "Welcome.md",
+    "Plugin_Release_Guide.md",
+    "README.md",
+    "Markdown_knowhow.md",
+    "Plugin_Development_Guide.md",
     "無題のファイル.md",
     "2025-12-28.md",
     "無題のファイル.base"
