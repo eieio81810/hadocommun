@@ -37,11 +37,11 @@ var GraphLabelManager = class {
   }
   async getFirstH1(file) {
     var _a, _b;
+    const cache = this.metadataCache.getFileCache(file);
+    const cachedHeading = (_b = (_a = cache == null ? void 0 : cache.headings) == null ? void 0 : _a.find((h) => h.level === 1)) == null ? void 0 : _b.heading;
+    if (cachedHeading)
+      return cachedHeading.trim();
     try {
-      const cache = this.metadataCache.getFileCache(file);
-      const cachedHeading = (_b = (_a = cache == null ? void 0 : cache.headings) == null ? void 0 : _a.find((h) => h.level === 1)) == null ? void 0 : _b.heading;
-      if (cachedHeading)
-        return cachedHeading.trim();
       const content = await this.vault.read(file);
       const lines = content.split("\n");
       for (const line of lines) {
@@ -51,7 +51,6 @@ var GraphLabelManager = class {
         }
       }
     } catch (error) {
-      console.error("Error reading file:", error);
     }
     return null;
   }
@@ -98,7 +97,7 @@ var HadocommunPlugin = class extends import_obsidian.Plugin {
     });
     ribbonIconEl.addClass("hadocommun-ribbon-class");
     this.addCommand({
-      id: "open-hadocommun-greeting",
+      id: "show-greeting",
       name: "Show greeting message",
       callback: () => {
         new import_obsidian.Notice(this.settings.greeting);
@@ -107,14 +106,14 @@ var HadocommunPlugin = class extends import_obsidian.Plugin {
     this.addSettingTab(new HadocommunSettingTab(this.app, this));
     this.app.workspace.onLayoutReady(() => {
       if (this.settings.useH1ForGraphNodes) {
-        this.handleLayoutChange();
+        void this.handleLayoutChange();
         this.startLabelLoop();
       }
     });
     this.registerEvent(
       this.app.workspace.on("layout-change", () => {
         if (this.settings.useH1ForGraphNodes) {
-          this.handleLayoutChange();
+          void this.handleLayoutChange();
           this.startLabelLoop();
         }
       })
@@ -134,12 +133,10 @@ var HadocommunPlugin = class extends import_obsidian.Plugin {
         }
       })
     );
-    console.log("Hadocommun loaded");
   }
   onunload() {
     this.stopLabelLoop();
     this.resetGraphLabels();
-    console.log("Hadocommun unloaded");
   }
   async loadSettings() {
     this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
@@ -149,7 +146,7 @@ var HadocommunPlugin = class extends import_obsidian.Plugin {
   }
   async handleLayoutChange() {
     this.currentRenderer = null;
-    await this.ensureRenderer();
+    this.currentRenderer = this.findRenderer();
   }
   stopLabelLoop() {
     if (this.labelInterval !== null) {
@@ -157,25 +154,14 @@ var HadocommunPlugin = class extends import_obsidian.Plugin {
       this.labelInterval = null;
     }
   }
-  async ensureRenderer() {
-    if (this.currentRenderer && this.isRenderer(this.currentRenderer)) {
-      return this.currentRenderer;
-    }
-    const renderer = this.findRenderer();
-    if (renderer) {
-      this.currentRenderer = renderer;
-      return renderer;
-    }
-    return null;
-  }
   findRenderer() {
-    var _a;
     const leaves = [
       ...this.app.workspace.getLeavesOfType("graph"),
       ...this.app.workspace.getLeavesOfType("localgraph")
     ];
     for (const leaf of leaves) {
-      const renderer = (_a = leaf.view) == null ? void 0 : _a.renderer;
+      const view = leaf.view;
+      const renderer = view == null ? void 0 : view.renderer;
       if (this.isRenderer(renderer)) {
         return renderer;
       }
@@ -186,22 +172,23 @@ var HadocommunPlugin = class extends import_obsidian.Plugin {
     return !!(renderer && renderer.px && renderer.px.stage && Array.isArray(renderer.nodes));
   }
   getRenderableNodes(renderer) {
-    var _a, _b, _c;
+    var _a;
     const result = [];
-    if ((renderer == null ? void 0 : renderer.nodeLookup) && typeof renderer.nodeLookup === "object") {
+    if (renderer.nodeLookup && typeof renderer.nodeLookup === "object") {
       for (const [key, value] of Object.entries(renderer.nodeLookup)) {
         const node = value;
-        const id = key || (node == null ? void 0 : node.path) || (node == null ? void 0 : node.id);
-        const textNode = node == null ? void 0 : node.text;
+        const id = key || node.path || node.id;
+        const textNode = node.text;
         if (id && textNode) {
           result.push({ id, textNode, rawNode: node });
         }
       }
     }
-    if (result.length === 0 && Array.isArray(renderer == null ? void 0 : renderer.nodes)) {
-      for (const node of renderer.nodes) {
-        const id = (_c = (_a = node == null ? void 0 : node.id) != null ? _a : node == null ? void 0 : node.path) != null ? _c : (_b = node == null ? void 0 : node.file) == null ? void 0 : _b.path;
-        const textNode = node == null ? void 0 : node.text;
+    if (result.length === 0 && Array.isArray(renderer.nodes)) {
+      for (const value of renderer.nodes) {
+        const node = value;
+        const id = (_a = node.id) != null ? _a : node.path;
+        const textNode = node.text;
         if (id && textNode) {
           result.push({ id, textNode, rawNode: node });
         }
@@ -225,11 +212,10 @@ var HadocommunPlugin = class extends import_obsidian.Plugin {
     const byBase = this.app.vault.getMarkdownFiles().find((f) => f.basename === nodeId || f.path === nodeId || f.path.endsWith(`/${nodeId}`));
     return byBase != null ? byBase : null;
   }
-  // グラフビューのラベルを更新
   async updateGraphLabels() {
     if (!this.settings.useH1ForGraphNodes)
       return;
-    const renderer = await this.ensureRenderer();
+    const renderer = this.currentRenderer || this.findRenderer();
     if (!renderer)
       return;
     const nodes = this.getRenderableNodes(renderer);
@@ -247,7 +233,7 @@ var HadocommunPlugin = class extends import_obsidian.Plugin {
         if (typeof textNode.updateText === "function") {
           try {
             textNode.updateText(true);
-          } catch (_) {
+          } catch (error) {
           }
         }
         textNode.dirty = true;
@@ -255,18 +241,17 @@ var HadocommunPlugin = class extends import_obsidian.Plugin {
       }
     }
   }
-  // グラフビューのラベルを元に戻す
   resetGraphLabels() {
     const renderer = this.currentRenderer;
     const nodes = renderer ? this.getRenderableNodes(renderer) : [];
     for (const { id, textNode } of nodes) {
-      const originalName = id ? this.originalLabels.get(id) : void 0;
+      const originalName = this.originalLabels.get(id);
       if (originalName && textNode && textNode.text !== originalName) {
         textNode.text = originalName;
         if (typeof textNode.updateText === "function") {
           try {
             textNode.updateText(true);
-          } catch (_) {
+          } catch (error) {
           }
         }
         textNode.dirty = true;
@@ -275,25 +260,13 @@ var HadocommunPlugin = class extends import_obsidian.Plugin {
     this.originalLabels.clear();
     this.labelManager.clearCache();
   }
-  positionOverlay(renderer, rawNode, overlay) {
-    var _a, _b, _c, _d, _e, _f;
-    const x = (_a = rawNode == null ? void 0 : rawNode.x) != null ? _a : 0;
-    const y = (_b = rawNode == null ? void 0 : rawNode.y) != null ? _b : 0;
-    overlay.x = x * renderer.scale + renderer.panX;
-    overlay.y = y * renderer.scale + renderer.panY;
-    if (renderer.nodeScale) {
-      (_d = (_c = overlay.scale) == null ? void 0 : _c.set) == null ? void 0 : _d.call(_c, 1 / (3 * renderer.nodeScale));
-    }
-    const baseAlpha = Math.max((_f = (_e = rawNode == null ? void 0 : rawNode.text) == null ? void 0 : _e.alpha) != null ? _f : 0, 0.9);
-    overlay.alpha = baseAlpha;
-  }
   startLabelLoop() {
     if (this.labelInterval !== null)
       return;
     const run = async () => {
       await this.updateGraphLabels();
     };
-    run();
+    void run();
     this.labelInterval = window.setInterval(run, 500);
     this.registerInterval(this.labelInterval);
   }
@@ -306,12 +279,12 @@ var HadocommunSettingTab = class extends import_obsidian.PluginSettingTab {
   display() {
     const { containerEl } = this;
     containerEl.empty();
-    containerEl.createEl("h2", { text: "Hadocommun Settings" });
+    new import_obsidian.Setting(containerEl).setName("Hadocommun settings").setHeading();
     new import_obsidian.Setting(containerEl).setName("Greeting message").setDesc("メッセージ通知に表示される挨拶文").addText((text) => text.setPlaceholder("Enter your greeting").setValue(this.plugin.settings.greeting).onChange(async (value) => {
       this.plugin.settings.greeting = value;
       await this.plugin.saveSettings();
     }));
-    new import_obsidian.Setting(containerEl).setName("グラフビューでH1見出しを使用").setDesc("グラフビューのノードラベルをファイル名ではなく、ファイルの最初のH1見出しで表示します").addToggle((toggle) => toggle.setValue(this.plugin.settings.useH1ForGraphNodes).onChange(async (value) => {
+    new import_obsidian.Setting(containerEl).setName("Use H1 for graph node labels").setDesc("グラフビューのノードラベルをファイル名ではなく、ファイルの最初のH1見出しで表示します").addToggle((toggle) => toggle.setValue(this.plugin.settings.useH1ForGraphNodes).onChange(async (value) => {
       this.plugin.settings.useH1ForGraphNodes = value;
       await this.plugin.saveSettings();
       if (value) {

@@ -9,11 +9,11 @@ export class GraphLabelManager {
 	) {}
 
 	async getFirstH1(file: TFile): Promise<string | null> {
-		try {
-			const cache = this.metadataCache.getFileCache(file);
-			const cachedHeading = cache?.headings?.find(h => h.level === 1)?.heading;
-			if (cachedHeading) return cachedHeading.trim();
+		const cache = this.metadataCache.getFileCache(file);
+		const cachedHeading = cache?.headings?.find(h => h.level === 1)?.heading;
+		if (cachedHeading) return cachedHeading.trim();
 
+		try {
 			const content = await this.vault.read(file);
 			const lines = content.split('\n');
 			for (const line of lines) {
@@ -23,7 +23,7 @@ export class GraphLabelManager {
 				}
 			}
 		} catch (error) {
-			console.error('Error reading file:', error);
+			// File read errors are expected for some scenarios, silently continue
 		}
 		return null;
 	}
