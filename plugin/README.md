@@ -1,4 +1,4 @@
-# Hadocommun Plugin
+# Hadocommun
 
 Obsidian用のハドこみゅプラグインです。
 
@@ -52,17 +52,17 @@ npm run build
 
 ```powershell
 # PowerShell（Windows）
-Copy-Item -Path plugin/main.js,plugin/manifest.json -Destination docs/.obsidian/plugins/hadocommun-plugin/ -Force
+Copy-Item -Path plugin/main.js,plugin/manifest.json -Destination docs/.obsidian/plugins/hadocommun/ -Force
 ```
 
 ```bash
 # Bash（Mac/Linux）
-cp plugin/main.js plugin/manifest.json docs/.obsidian/plugins/hadocommun-plugin/
+cp plugin/main.js plugin/manifest.json docs/.obsidian/plugins/hadocommun/
 ```
 
 その後、Obsidianでプラグインをリロード：
 - Obsidianを再起動、または
-- 設定 → コミュニティプラグイン → 「Hadocommun Plugin」を無効化 → 有効化
+- 設定 → コミュニティプラグイン → 「Hadocommun」を無効化 → 有効化
 
 ## 機能
 
@@ -72,7 +72,7 @@ cp plugin/main.js plugin/manifest.json docs/.obsidian/plugins/hadocommun-plugin/
 
 **使い方:**
 1. Obsidian の設定を開く
-2. 「Hadocommun Plugin」セクション → 「グラフビューでH1見出しを使用」をON
+2. 「Hadocommun」セクション → 「グラフビューでH1見出しを使用」をON
 3. グラフビューを開くと、ノード名がH1見出しに置き換わります
 
 **仕組み:**
@@ -145,7 +145,7 @@ plugin/
 1. Obsidianの設定を開く
 2. 「コミュニティプラグイン」に移動
 3. 「制限モードをオフ」にする（初回のみ）
-4. 「Hadocommun Plugin」を有効化
+4. 「Hadocommun」を有効化
 
 ## コントリビューション
 

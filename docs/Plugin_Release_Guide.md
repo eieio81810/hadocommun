@@ -8,7 +8,7 @@
 
 ### 必須ファイル
 
-- [x] `manifest.json` - プラグインメタデータ
+- [x] `manifest.json` - プラグインメタデータ（**ルートディレクトリとplugin/の両方に配置**）
 - [x] `main.js` - ビルド済みプラグイン本体
 - [ ] `styles.css` - スタイルシート（オプション）
 - [ ] `README.md` - 英語版ドキュメント
@@ -29,6 +29,12 @@
 - [x] UTF-8（BOMなし）エンコーディング
 - [ ] console.log のデバッグコードを削除
 
+### 命名規則
+
+- [ ] プラグインID に "plugin" という単語を含めない（例: `hadocommun-plugin` ❌ → `hadocommun` ✅）
+- [ ] プラグイン名に "Plugin" という単語を含めない（例: `Hadocommun Plugin` ❌ → `Hadocommun` ✅）
+- [ ] 説明文の末尾に `.?!)` のいずれかを付ける
+
 ---
 
 ## 1. リリース用ファイルの準備
@@ -37,18 +43,54 @@
 
 プラグイン情報が正しく設定されているか確認：
 
+⚠️ **重要な命名規則:**
+- **ID**: "plugin" という単語を含めない（短く簡潔に）
+- **Name**: "Plugin" という単語を含めない（冗長なため）
+- **Description**: 末尾に `.?!)` のいずれかを付ける
+
 ```json
 {
-  "id": "hadocommun-plugin",
-  "name": "Hadocommun Plugin",
+  "id": "hadocommun",
+  "name": "Hadocommun",
   "version": "1.0.0",
   "minAppVersion": "0.15.0",
-  "description": "Display H1 headings as graph node labels",
+  "description": "Display H1 headings as graph node labels instead of file names.",
   "author": "Hadocommun",
   "authorUrl": "https://github.com/eieio81810/hadocommun",
   "isDesktopOnly": false
 }
 ```
+
+❌ **よくある間違い:**
+```json
+{
+  "id": "hadocommun-plugin",        // ❌ "plugin" を含めない
+  "name": "Hadocommun Plugin",      // ❌ "Plugin" を含めない
+  "description": "Display H1 headings"  // ❌ 末尾に句読点がない
+}
+```
+
+### manifest.json をルートディレクトリにも配置
+
+Obsidian の検証ボットはリポジトリルートの `manifest.json` を確認します。
+
+```bash
+# plugin/manifest.json をルートにコピー
+cp plugin/manifest.json manifest.json
+```
+
+**ディレクトリ構造:**
+```
+hadocommun/
+├── manifest.json        # ← 必須（ルート）
+├── plugin/
+│   ├── manifest.json    # ← 開発用
+│   ├── main.js
+│   └── ...
+└── docs/
+```
+
+⚠️ **注意:** 両方のファイルを同期させること！バージョン更新時は両方を更新。
 
 ### NOTICES.md の生成
 
@@ -118,6 +160,11 @@ npm run build
 
 ## 3. GitHub リリースの作成
 
+### ⚠️ 重要: PR送信前にリリースを作成
+
+**obsidian-releases に PR を送る前に、必ず GitHub Release を作成してください。**
+Obsidian チームのボットは、manifest.json のバージョンと一致する GitHub Release タグの存在を確認します。
+
 ### リリースノートの準備
 
 `plugin/CHANGELOG.md` を作成：
@@ -140,114 +187,182 @@ npm run build
 
 ### Git タグの作成
 
+**manifest.json のバージョンと完全に一致させること:**
+
 ```bash
-git tag -a v1.0.0 -m "Release version 1.0.0"
-git push origin v1.0.0
+# manifest.json の version が "1.0.0" の場合
+git tag -a 1.0.0 -m "Release version 1.0.0"
+git push origin 1.0.0
 ```
+
+❌ **よくある間違い:**
+- タグ名に `v` を付ける（例: `v1.0.0`） → `1.0.0` にする
+- manifest.json と異なるバージョン（例: manifest が `1.0.0` なのに PR で `1.2` を指定）
 
 ### GitHub Release の作成
 
 1. GitHub リポジトリページを開く
 2. 「Releases」→「Create a new release」
-3. タグを選択：`v1.0.0`
-4. リリースタイトル：`Version 1.0.0`
+3. **タグを選択：`1.0.0`** (manifest.json と完全一致)
+4. リリースタイトル：`1.0.0`
 5. リリースノートを記入
 6. 以下のファイルを添付：
-   - `main.js`
-   - `manifest.json`
+   - `plugin/main.js`
+   - `plugin/manifest.json`
    - `styles.css`（あれば）
+
+7. **「Publish release」をクリック**
+
+### リリース確認
+
+以下のURLでリリースが作成されたことを確認:
+```
+https://github.com/eieio81810/hadocommun/releases/tag/1.0.0
+```
 
 ---
 
 ## 4. コミュニティプラグイン申請
 
+### ⚠️ 事前確認
+
+- [x] GitHub Release が作成済み
+- [x] manifest.json のバージョンとリリースタグが一致
+- [x] main.js と manifest.json がリリースに添付済み
+- [x] 英語版 README が存在
+- [x] LICENSE ファイルが存在
+
 ### obsidian-releases リポジトリへの PR
 
 1. [obsidian-releases](https://github.com/obsidianmd/obsidian-releases) をフォーク
 
-2. `community-plugins.json` に追加：
+2. **`community-plugins.json` の最後に追加：**
+
+   ⚠️ **重要:** 必ずファイルの**最後**に追加してください。既存のプラグインの間に挿入してはいけません。
 
 ```json
 {
-  "id": "hadocommun-plugin",
-  "name": "Hadocommun Plugin",
+  "id": "hadocommun",
+  "name": "Hadocommun",
   "author": "Hadocommun",
-  "description": "Display H1 headings as graph node labels",
+  "description": "Display H1 headings as graph node labels instead of file names.",
   "repo": "eieio81810/hadocommun"
 }
 ```
 
-3. プラグイン情報を `community-plugin-stats.json` に追加（自動生成される場合もあり）
+   **命名規則チェック:**
+   - ✅ ID に "plugin" という単語を含まない
+   - ✅ Name に "Plugin" という単語を含まない
+   - ✅ Description の末尾に句読点（`.`）がある
 
-4. Pull Request を作成：
-   - タイトル：`Add Hadocommun Plugin`
-   - 説明：プラグインの概要と主な機能を記載
+3. コミットメッセージ:
+```
+Add Hadocommun Plugin
+```
+
+4. **Pull Request を作成 (テンプレートに従う):**
+
+   PRテンプレートが表示されるので、すべての項目を埋めてください。
+
+   **PRタイトル:** `Add Hadocommun Plugin`
+
+   **PR本文 (テンプレート例):**
+   ```markdown
+   ## Plugin Information
+   
+   - **Plugin Name:** Hadocommun
+   - **Plugin ID:** hadocommun
+   - **Repository:** https://github.com/eieio81810/hadocommun
+   - **Initial Version:** 1.0.0
+   - **Minimum Obsidian Version:** 0.15.0
+   
+   ## Description
+   
+   This plugin displays H1 headings as graph node labels instead of file names, making graph view more readable and informative.
+   
+   ### Key Features
+   - Automatic H1 heading extraction and display
+   - Toggle setting to enable/disable
+   - Works with both global and local graph views
+   - UTF-8 support for multiple languages
+   
+   ## Checklist
+   
+   - [x] I have read the plugin guidelines
+   - [x] My plugin follows the Obsidian API best practices
+   - [x] I have created a GitHub release with the required files
+   - [x] The version in manifest.json matches the GitHub release tag
+   - [x] My README is in English
+   - [x] I have included a LICENSE file
+   - [x] I have added my plugin at the end of community-plugins.json
+   - [x] Plugin ID does not contain the word "plugin"
+   - [x] Plugin name does not contain the word "Plugin"
+   - [x] Description ends with proper punctuation (.?!)
+   - [x] manifest.json exists at the root of the repository
+   ```
+
+### ❌ よくあるエラーと対処法
+
+#### エラー1: "Unable to find a release with the tag X.X"
+**原因:** manifest.json のバージョンと GitHub Release のタグが一致していない
+
+**対処法:**
+1. `plugin/manifest.json` を開いてバージョンを確認
+2. GitHub Releases でタグが存在するか確認
+3. タグ名が完全一致しているか確認（`v1.0.0` ではなく `1.0.0`）
+
+#### エラー2: "The newly added entry is not at the end"
+**原因:** `community-plugins.json` で既存プラグインの間に挿入した
+
+**対処法:**
+1. ファイルの**最後**に移動
+2. カンマの位置に注意（最後のプラグインの後にカンマを追加）
+
+#### エラー3: "You did not follow the pull request template"
+**原因:** PR作成時にテンプレートを削除したか、必要な情報を記載していない
+
+**対処法:**
+1. PRの説明を編集
+2. テンプレートのすべての項目を埋める
+3. チェックリストをすべて確認
+
+#### エラー4: "Please don't use the word plugin/Plugin in the ID/name"
+**原因:** プラグインIDやNameに "plugin" または "Plugin" という単語を使用した
+
+**対処法:**
+1. `manifest.json` を開く
+2. `"id": "your-name-plugin"` → `"id": "your-name"` に変更
+3. `"name": "Your Plugin"` → `"name": "Your Name"` に変更
+4. ルートの `manifest.json` も同じように変更
+
+#### エラー5: "Your description needs to have one of the following characters at the end"
+**原因:** 説明文の末尾に句読点がない
+
+**対処法:**
+1. `manifest.json` の `description` を確認
+2. 末尾に `.?!)` のいずれかを追加
+3. 例: `"description": "Display H1 headings as labels"` → `"description": "Display H1 headings as labels."`
+
+#### エラー6: "You don't have a manifest.json at the root of your repo"
+**原因:** リポジトリのルートディレクトリに `manifest.json` が存在しない
+
+**対処法:**
+1. `plugin/manifest.json` をルートディレクトリにコピー
+2. 両方のファイルが同一の内容であることを確認
+3. Git にコミットしてプッシュ
 
 ### PR テンプレートの記入
 
 - [ ] プラグイン名とIDが一致
 - [ ] 最新バージョンが正しく設定
+- [ ] **GitHub Release が作成済み**
+- [ ] **manifest.json のバージョンとリリースタグが一致**
 - [ ] リリースにファイルが添付されている
 - [ ] README が英語で書かれている
 - [ ] ライセンスが明記されている
 - [ ] NOTICES.md にサードパーティライセンスを記載
-
----
-
-## 5. レビュー＆承認待ち
-
-### レビュープロセス
-
-- Obsidian チームがプラグインをレビュー
-- セキュリティ、パフォーマンス、ガイドライン遵守をチェック
-- フィードバックがあれば対応
-
-### 承認後
-
-- プラグインがコミュニティプラグインリストに追加
-- Obsidian アプリ内の「コミュニティプラグイン」からインストール可能に
-
----
-
-## 6. 公開後のメンテナンス
-
-### バージョン管理
-
-新バージョンをリリースする際：
-
-1. `manifest.json` の `version` を更新
-2. **依存パッケージを更新した場合は `npm run generate-notices` を実行**
-3. `npm run build`
-4. Git タグを作成（`v1.1.0` など）
-5. GitHub Release を作成
-6. ファイルを添付
-
-### フィードバック対応
-
-- GitHub Issues で報告されたバグを修正
-- ユーザーからの機能要望を検討
-- 定期的にテストを追加・更新
-
----
-
-## 📚 参考リンク
-
-- [Obsidian プラグイン開発ガイド](https://docs.obsidian.md/Plugins/Getting+started/Build+a+plugin)
-- [obsidian-releases リポジトリ](https://github.com/obsidianmd/obsidian-releases)
-- [プラグイン提出ガイドライン](https://docs.obsidian.md/Plugins/Releasing/Submit+your+plugin)
-
----
-
-## ✅ 完了したら
-
-- [ ] NOTICES.md 生成完了（`npm run generate-notices`）
-- [ ] GitHub Release 作成完了
-- [ ] obsidian-releases に PR 送信完了
-- [ ] レビュー対応完了
-- [ ] プラグイン公開完了 🎉
-
-公開後は Discord で報告し、コミュニティに共有しましょう！
-
----
-
-[[Plugin_Development_Guide|開発ガイドに戻る]]
+- [ ] **community-plugins.json の最後に追加**
+- [ ] **プラグインID に "plugin" という単語を含まない**
+- [ ] **プラグイン名に "Plugin" という単語を含まない**
+- [ ] **説明文の末尾に句読点 (.?!) がある**
+- [ ] **manifest.json がリポジトリルートに存在**

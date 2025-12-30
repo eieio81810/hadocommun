@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Custom label templates
 - Graph view style customization
 
-## [1.0.0] - 2025-01-30
+## [1.0.0] - 2025-12-30
 
 ### Added
 - Display H1 headings as graph node labels

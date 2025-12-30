@@ -28,10 +28,10 @@ export default class HadocommunPlugin extends Plugin {
 		// GraphLabelManager を初期化
 		this.labelManager = new GraphLabelManager(this.app.metadataCache, this.app.vault);
 
-		const ribbonIconEl = this.addRibbonIcon('dice', 'Hadocommun Plugin', (evt: MouseEvent) => {
+		const ribbonIconEl = this.addRibbonIcon('dice', 'Hadocommun', (evt: MouseEvent) => {
 			new Notice(this.settings.greeting);
 		});
-		ribbonIconEl.addClass('hadocommun-plugin-ribbon-class');
+		ribbonIconEl.addClass('hadocommun-ribbon-class');
 
 		this.addCommand({
 			id: 'open-hadocommun-greeting',
@@ -78,13 +78,13 @@ export default class HadocommunPlugin extends Plugin {
 			})
 		);
 
-		console.log('Hadocommun Plugin loaded');
+		console.log('Hadocommun loaded');
 	}
 
 	onunload() {
 		this.stopLabelLoop();
 		this.resetGraphLabels();
-		console.log('Hadocommun Plugin unloaded');
+		console.log('Hadocommun unloaded');
 	}
 
 	async loadSettings() {
@@ -261,7 +261,7 @@ class HadocommunSettingTab extends PluginSettingTab {
 
 		containerEl.empty();
 
-		containerEl.createEl('h2', {text: 'Hadocommun Plugin Settings'});
+		containerEl.createEl('h2', {text: 'Hadocommun Settings'});
 
 		new Setting(containerEl)
 			.setName('Greeting message')

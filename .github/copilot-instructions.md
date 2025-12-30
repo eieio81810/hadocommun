@@ -13,12 +13,12 @@ const context = await esbuild.context({
 ```
 
 ## Obsidian プラグイン開発
-- 開発: `plugin/`。ドキュメント・vault: `docs/`。配置先: `docs/.obsidian/plugins/hadocommun-plugin/`。
+- 開発: `plugin/`。ドキュメント・vault: `docs/`。配置先: `docs/.obsidian/plugins/hadocommun/`。
 - TypeScript + esbuild。
 - 一連の流れ（README 準拠）:
   1. `npm run dev` で開発（`plugin/`）。
   2. `npm run build`。
-  3. `Copy-Item -Path plugin/main.js,plugin/manifest.json -Destination docs/.obsidian/plugins/hadocommun-plugin/ -Force` で docs 配下の開発用プラグインを更新。
+  3. `Copy-Item -Path plugin/main.js,plugin/manifest.json -Destination docs/.obsidian/plugins/hadocommun/ -Force` で docs 配下の開発用プラグインを更新。
 
 ## テスト駆動開発 (TDD) ワークフロー
 - **Red → Green → Refactor** のサイクルを守る。

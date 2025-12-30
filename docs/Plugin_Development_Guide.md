@@ -22,7 +22,7 @@ hadocommun/
 │   ├── main.ts         # プラグインエントリーポイント
 │   └── manifest.json   # プラグインメタデータ
 ├── docs/               # Obsidian Vault（ドキュメント）
-│   └── .obsidian/plugins/hadocommun-plugin/  # 開発用プラグイン配置先
+│   └── .obsidian/plugins/hadocommun/  # 開発用プラグイン配置先
 └── .github/
     └── copilot-instructions.md  # Copilot開発ルール
 ```
@@ -131,7 +131,7 @@ npm run build
 ### 開発用プラグインを更新
 
 ```powershell
-Copy-Item -Path plugin/main.js,plugin/manifest.json -Destination docs/.obsidian/plugins/hadocommun-plugin/ -Force
+Copy-Item -Path plugin/main.js,plugin/manifest.json -Destination docs/.obsidian/plugins/hadocommun/ -Force
 ```
 
 ### Obsidianでプラグインをリロード

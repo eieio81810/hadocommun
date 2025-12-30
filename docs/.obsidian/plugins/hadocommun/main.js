@@ -93,10 +93,10 @@ var HadocommunPlugin = class extends import_obsidian.Plugin {
     await this.loadSettings();
     window.hadocommunPlugin = this;
     this.labelManager = new GraphLabelManager(this.app.metadataCache, this.app.vault);
-    const ribbonIconEl = this.addRibbonIcon("dice", "Hadocommun Plugin", (evt) => {
+    const ribbonIconEl = this.addRibbonIcon("dice", "Hadocommun", (evt) => {
       new import_obsidian.Notice(this.settings.greeting);
     });
-    ribbonIconEl.addClass("hadocommun-plugin-ribbon-class");
+    ribbonIconEl.addClass("hadocommun-ribbon-class");
     this.addCommand({
       id: "open-hadocommun-greeting",
       name: "Show greeting message",
@@ -134,12 +134,12 @@ var HadocommunPlugin = class extends import_obsidian.Plugin {
         }
       })
     );
-    console.log("Hadocommun Plugin loaded");
+    console.log("Hadocommun loaded");
   }
   onunload() {
     this.stopLabelLoop();
     this.resetGraphLabels();
-    console.log("Hadocommun Plugin unloaded");
+    console.log("Hadocommun unloaded");
   }
   async loadSettings() {
     this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
@@ -306,7 +306,7 @@ var HadocommunSettingTab = class extends import_obsidian.PluginSettingTab {
   display() {
     const { containerEl } = this;
     containerEl.empty();
-    containerEl.createEl("h2", { text: "Hadocommun Plugin Settings" });
+    containerEl.createEl("h2", { text: "Hadocommun Settings" });
     new import_obsidian.Setting(containerEl).setName("Greeting message").setDesc("メッセージ通知に表示される挨拶文").addText((text) => text.setPlaceholder("Enter your greeting").setValue(this.plugin.settings.greeting).onChange(async (value) => {
       this.plugin.settings.greeting = value;
       await this.plugin.saveSettings();
