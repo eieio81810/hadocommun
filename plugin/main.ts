@@ -1,4 +1,6 @@
+/// <reference path="./node_modules/obsidian/obsidian.d.ts" />
 import { App, Plugin, PluginSettingTab, Setting, Notice, TFile } from 'obsidian';
+import { GraphLabelManager } from './src/graphLabelManager';
 
 interface HadocommunPluginSettings {
 	greeting: string;
@@ -12,10 +14,19 @@ const DEFAULT_SETTINGS: HadocommunPluginSettings = {
 
 export default class HadocommunPlugin extends Plugin {
 	settings: HadocommunPluginSettings;
-	private graphObserver: MutationObserver | null = null;
+	private currentRenderer: any | null = null;
+	private labelInterval: number | null = null;
+	private originalLabels: Map<string, string> = new Map();
+	public overlayLabels: Map<string, any> = new Map();
+	private labelManager: GraphLabelManager;
 
 	async onload() {
 		await this.loadSettings();
+
+		(window as any).hadocommunPlugin = this;
+
+		// GraphLabelManager を初期化
+		this.labelManager = new GraphLabelManager(this.app.metadataCache, this.app.vault);
 
 		const ribbonIconEl = this.addRibbonIcon('dice', 'Hadocommun Plugin', (evt: MouseEvent) => {
 			new Notice(this.settings.greeting);
@@ -32,121 +43,29 @@ export default class HadocommunPlugin extends Plugin {
 
 		this.addSettingTab(new HadocommunSettingTab(this.app, this));
 
-		// グラフビューの監視を開始
 		this.app.workspace.onLayoutReady(() => {
 			if (this.settings.useH1ForGraphNodes) {
-				this.initGraphObserver();
+				this.handleLayoutChange();
+				this.startLabelLoop();
 			}
 		});
+
+		this.registerEvent(
+			this.app.workspace.on('layout-change', () => {
+				if (this.settings.useH1ForGraphNodes) {
+					this.handleLayoutChange();
+					this.startLabelLoop();
+				}
+			})
+		);
 
 		console.log('Hadocommun Plugin loaded');
 	}
 
 	onunload() {
-		this.cleanupGraphObserver();
+		this.stopLabelLoop();
+		this.resetGraphLabels();
 		console.log('Hadocommun Plugin unloaded');
-	}
-
-	// ファイルからH1見出しを取得
-	async getFirstH1(file: TFile): Promise<string | null> {
-		try {
-			const content = await this.app.vault.read(file);
-			const lines = content.split('\n');
-			
-			for (const line of lines) {
-				const trimmed = line.trim();
-				// H1見出し（# で始まり、## ではない）を探す
-				if (trimmed.startsWith('# ') && !trimmed.startsWith('## ')) {
-					return trimmed.substring(2).trim();
-				}
-			}
-		} catch (error) {
-			console.error('Error reading file:', error);
-		}
-		return null;
-	}
-
-	// グラフビューのラベルを更新
-	async updateGraphLabels() {
-		// グラフビューのノードを探して更新
-		const graphElements = document.querySelectorAll('.graph-view .graph-node text');
-		
-		for (const element of Array.from(graphElements)) {
-			const textElement = element as SVGTextElement;
-			const fileName = textElement.textContent;
-			
-			if (fileName) {
-				// ファイル名からファイルを取得
-				const file = this.app.vault.getMarkdownFiles().find(f => 
-					f.basename === fileName || f.name === fileName
-				);
-				
-				if (file) {
-					const h1 = await this.getFirstH1(file);
-					if (h1) {
-						textElement.textContent = h1;
-						textElement.setAttribute('data-original-name', fileName);
-					}
-				}
-			}
-		}
-	}
-
-	// グラフビューのラベルを元に戻す
-	resetGraphLabels() {
-		const graphElements = document.querySelectorAll('.graph-view .graph-node text');
-		
-		for (const element of Array.from(graphElements)) {
-			const textElement = element as SVGTextElement;
-			const originalName = textElement.getAttribute('data-original-name');
-			
-			if (originalName) {
-				textElement.textContent = originalName;
-				textElement.removeAttribute('data-original-name');
-			}
-		}
-	}
-
-	// グラフビューの監視を初期化
-	initGraphObserver() {
-		this.cleanupGraphObserver();
-
-		// MutationObserverでグラフビューの変更を監視
-		this.graphObserver = new MutationObserver(() => {
-			if (this.settings.useH1ForGraphNodes) {
-				this.updateGraphLabels();
-			}
-		});
-
-		// グラフビューコンテナを監視
-		const observeGraphView = () => {
-			const graphView = document.querySelector('.graph-view');
-			if (graphView) {
-				this.graphObserver?.observe(graphView, {
-					childList: true,
-					subtree: true
-				});
-				this.updateGraphLabels();
-			}
-		};
-
-		// 初回実行
-		observeGraphView();
-
-		// レイアウト変更を監視して、グラフビューが開かれたら監視を再開
-		this.registerEvent(
-			this.app.workspace.on('layout-change', () => {
-				observeGraphView();
-			})
-		);
-	}
-
-	// グラフビューの監視をクリーンアップ
-	cleanupGraphObserver() {
-		if (this.graphObserver) {
-			this.graphObserver.disconnect();
-			this.graphObserver = null;
-		}
 	}
 
 	async loadSettings() {
@@ -155,6 +74,158 @@ export default class HadocommunPlugin extends Plugin {
 
 	async saveSettings() {
 		await this.saveData(this.settings);
+	}
+
+	async handleLayoutChange() {
+		this.currentRenderer = null;
+		await this.ensureRenderer();
+	}
+
+	stopLabelLoop() {
+		if (this.labelInterval !== null) {
+			window.clearInterval(this.labelInterval);
+			this.labelInterval = null;
+		}
+	}
+
+	private async ensureRenderer(): Promise<any | null> {
+		if (this.currentRenderer && this.isRenderer(this.currentRenderer)) {
+			return this.currentRenderer;
+		}
+		const renderer = this.findRenderer();
+		if (renderer) {
+			this.currentRenderer = renderer;
+			return renderer;
+		}
+		return null;
+	}
+
+	private findRenderer(): any | null {
+		const leaves = [
+			...this.app.workspace.getLeavesOfType('graph'),
+			...this.app.workspace.getLeavesOfType('localgraph')
+		];
+		for (const leaf of leaves) {
+			const renderer = (leaf as any).view?.renderer;
+			if (this.isRenderer(renderer)) {
+				return renderer;
+			}
+		}
+		return null;
+	}
+
+	private isRenderer(renderer: any): boolean {
+		return !!(renderer && renderer.px && renderer.px.stage && Array.isArray(renderer.nodes));
+	}
+
+	private getRenderableNodes(renderer: any): Array<{ id: string; textNode: any; rawNode: any }> {
+		const result: Array<{ id: string; textNode: any; rawNode: any }> = [];
+		if (renderer?.nodeLookup && typeof renderer.nodeLookup === 'object') {
+			for (const [key, value] of Object.entries(renderer.nodeLookup)) {
+				const node: any = value;
+				const id = key || node?.path || node?.id;
+				const textNode = node?.text;
+				if (id && textNode) {
+					result.push({ id, textNode, rawNode: node });
+				}
+			}
+		}
+		if (result.length === 0 && Array.isArray(renderer?.nodes)) {
+			for (const node of renderer.nodes as any[]) {
+				const id = (node as any)?.id ?? (node as any)?.path ?? (node as any)?.file?.path;
+				const textNode = (node as any)?.text;
+				if (id && textNode) {
+					result.push({ id, textNode, rawNode: node });
+				}
+			}
+		}
+		return result;
+	}
+
+	private async getH1ForNode(nodeId: string): Promise<string | null> {
+		return await this.labelManager.getH1ForNode(nodeId, (id) => this.resolveFileFromId(id));
+	}
+
+	private resolveFileFromId(nodeId: string): TFile | null {
+		const exact = this.app.vault.getAbstractFileByPath(nodeId);
+		if (exact instanceof TFile) return exact;
+		const withMd = this.app.vault.getAbstractFileByPath(nodeId.endsWith('.md') ? nodeId : `${nodeId}.md`);
+		if (withMd instanceof TFile) return withMd;
+		const linkDest = this.app.metadataCache.getFirstLinkpathDest(nodeId.replace(/\.md$/i, ''), '');
+		if (linkDest instanceof TFile) return linkDest;
+		const byBase = this.app.vault.getMarkdownFiles().find(f => f.basename === nodeId || f.path === nodeId || f.path.endsWith(`/${nodeId}`));
+		return byBase ?? null;
+	}
+
+	// グラフビューのラベルを更新
+	async updateGraphLabels() {
+		if (!this.settings.useH1ForGraphNodes) return;
+		const renderer = await this.ensureRenderer();
+		if (!renderer) return;
+
+		const nodes = this.getRenderableNodes(renderer);
+		if (nodes.length === 0) return;
+
+		for (const { id, textNode, rawNode } of nodes) {
+			if (!id || !textNode) continue;
+
+			// 元のラベルを保存（初回のみ）
+			if (!this.originalLabels.has(id) && typeof (textNode as any).text === 'string') {
+				this.originalLabels.set(id, (textNode as any).text as string);
+			}
+
+			const h1 = await this.getH1ForNode(id);
+			if (h1 && (textNode as any).text !== h1) {
+				// 既存のテキストノードを直接書き換え
+				(textNode as any).text = h1;
+				// PIXI Text の更新を促す
+				if (typeof (textNode as any).updateText === 'function') {
+					try { (textNode as any).updateText(true); } catch (_) {}
+				}
+				(textNode as any).dirty = true;
+				(rawNode as any).fontDirty = true;
+			}
+		}
+	}
+
+	// グラフビューのラベルを元に戻す
+	resetGraphLabels() {
+		const renderer = this.currentRenderer;
+		const nodes = renderer ? this.getRenderableNodes(renderer) : [];
+		for (const { id, textNode } of nodes) {
+			const originalName = id ? this.originalLabels.get(id) : undefined;
+			if (originalName && textNode && (textNode as any).text !== originalName) {
+				(textNode as any).text = originalName;
+				if (typeof (textNode as any).updateText === 'function') {
+					try { (textNode as any).updateText(true); } catch (_) {}
+				}
+				(textNode as any).dirty = true;
+			}
+		}
+		this.originalLabels.clear();
+		this.labelManager.clearCache();
+	}
+
+	private positionOverlay(renderer: any, rawNode: any, overlay: any) {
+		const x = rawNode?.x ?? 0;
+		const y = rawNode?.y ?? 0;
+		overlay.x = x * renderer.scale + renderer.panX;
+		overlay.y = y * renderer.scale + renderer.panY;
+		if (renderer.nodeScale) {
+			overlay.scale?.set?.(1 / (3 * renderer.nodeScale));
+		}
+		const baseAlpha = Math.max((rawNode as any)?.text?.alpha ?? 0, 0.9);
+		overlay.alpha = baseAlpha;
+	}
+
+	startLabelLoop() {
+		if (this.labelInterval !== null) return;
+		const run = async () => {
+			await this.updateGraphLabels();
+		};
+		run();
+		this.labelInterval = window.setInterval(run, 500);
+		this.registerInterval(this.labelInterval);
 	}
 }
 
@@ -193,8 +264,12 @@ class HadocommunSettingTab extends PluginSettingTab {
 					this.plugin.settings.useH1ForGraphNodes = value;
 					await this.plugin.saveSettings();
 					if (value) {
-						this.plugin.updateGraphLabels();
+						await this.plugin.handleLayoutChange();
+						this.plugin.startLabelLoop();
+						// 即座にラベルを更新
+						await this.plugin.updateGraphLabels();
 					} else {
+						this.plugin.stopLabelLoop();
 						this.plugin.resetGraphLabels();
 					}
 				}));

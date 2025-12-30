@@ -1,9 +1,9 @@
 {
   "id": "hadocommun-plugin",
   "name": "Hadocommun Plugin",
-  "version": "1.1.0",
+  "version": "1.0.0",
   "minAppVersion": "0.15.0",
-  "description": "A plugin for Hadocommun community features",
+  "description": "Display H1 headings as graph node labels instead of file names",
   "author": "Hadocommun",
   "authorUrl": "https://github.com/eieio81810/hadocommun",
   "isDesktopOnly": false

@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
+    "baseUrl": "./plugin",
     "inlineSourceMap": true,
     "inlineSources": true,
     "module": "ESNext",
@@ -23,12 +23,12 @@
     ],
     "paths": {
       "obsidian": [
-        "node_modules/obsidian/obsidian.d.ts"
+        "plugin/node_modules/obsidian/obsidian.d.ts"
       ]
     }
   },
   "include": [
-    "**/*.ts",
-    "node_modules/obsidian/obsidian.d.ts"
+    "plugin/**/*.ts",
+    "plugin/node_modules/obsidian/obsidian.d.ts"
   ]
 }
