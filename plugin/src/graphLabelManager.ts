@@ -22,7 +22,7 @@ export class GraphLabelManager {
 					return trimmed.substring(2).trim();
 				}
 			}
-		} catch (error) {
+		} catch {
 			// File read errors are expected for some scenarios, silently continue
 		}
 		return null;

@@ -73,7 +73,7 @@ export default class HadocommunPlugin extends Plugin {
 
 		this.app.workspace.onLayoutReady(() => {
 			if (this.settings.useH1ForGraphNodes) {
-				void this.handleLayoutChange();
+				this.handleLayoutChange();
 				this.startLabelLoop();
 			}
 		});
@@ -81,7 +81,7 @@ export default class HadocommunPlugin extends Plugin {
 		this.registerEvent(
 			this.app.workspace.on('layout-change', () => {
 				if (this.settings.useH1ForGraphNodes) {
-					void this.handleLayoutChange();
+					this.handleLayoutChange();
 					this.startLabelLoop();
 				}
 			})
@@ -118,7 +118,7 @@ export default class HadocommunPlugin extends Plugin {
 		await this.saveData(this.settings);
 	}
 
-	async handleLayoutChange() {
+	handleLayoutChange() {
 		this.currentRenderer = null;
 		this.currentRenderer = this.findRenderer();
 	}
@@ -184,7 +184,7 @@ export default class HadocommunPlugin extends Plugin {
 		const withMd = this.app.vault.getAbstractFileByPath(nodeId.endsWith('.md') ? nodeId : `${nodeId}.md`);
 		if (withMd instanceof TFile) return withMd;
 		const linkDest = this.app.metadataCache.getFirstLinkpathDest(nodeId.replace(/\.md$/i, ''), '');
-		if (linkDest instanceof TFile) return linkDest;
+		if (linkDest) return linkDest;
 		const byBase = this.app.vault.getMarkdownFiles().find(f => f.basename === nodeId || f.path === nodeId || f.path.endsWith(`/${nodeId}`));
 		return byBase ?? null;
 	}
@@ -210,7 +210,7 @@ export default class HadocommunPlugin extends Plugin {
 				if (typeof textNode.updateText === 'function') {
 					try {
 						textNode.updateText(true);
-					} catch (error) {
+					} catch {
 						// Silently ignore PIXI update errors
 					}
 				}
@@ -230,7 +230,7 @@ export default class HadocommunPlugin extends Plugin {
 				if (typeof textNode.updateText === 'function') {
 					try {
 						textNode.updateText(true);
-					} catch (error) {
+					} catch {
 						// Silently ignore PIXI update errors
 					}
 				}
@@ -266,7 +266,7 @@ class HadocommunSettingTab extends PluginSettingTab {
 		containerEl.empty();
 
 		new Setting(containerEl)
-			.setName('Hadocommun settings')
+			.setName('General')
 			.setHeading();
 
 		new Setting(containerEl)
@@ -282,14 +282,14 @@ class HadocommunSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('Use H1 for graph node labels')
-			.setDesc('グラフビューのノードラベルをファイル名ではなく、ファイルの最初のH1見出しで表示します')
+			.setDesc('Display the first H1 heading of each file as its label in graph view')
 			.addToggle(toggle => toggle
 				.setValue(this.plugin.settings.useH1ForGraphNodes)
 				.onChange(async (value) => {
 					this.plugin.settings.useH1ForGraphNodes = value;
 					await this.plugin.saveSettings();
 					if (value) {
-						await this.plugin.handleLayoutChange();
+						this.plugin.handleLayoutChange();
 						this.plugin.startLabelLoop();
 						await this.plugin.updateGraphLabels();
 					} else {

@@ -259,28 +259,75 @@ new Setting(containerEl)
 
 **エラー:**
 ```
-Async method 'ensureRenderer' has no 'await' expression.
+Async method 'handleLayoutChange' has no 'await' expression.
 ```
 
 **修正前:**
 ```typescript
-private async ensureRenderer(): Promise<GraphRenderer | null> {
-	if (this.currentRenderer) {
-		return this.currentRenderer;
-	}
-	return this.findRenderer(); // awaitがない
+async handleLayoutChange() {
+	this.currentRenderer = null;
+	this.currentRenderer = this.findRenderer(); // awaitがない
 }
 ```
 
 **修正後:**
 ```typescript
-async handleLayoutChange() {
+handleLayoutChange() {
 	this.currentRenderer = null;
 	this.currentRenderer = this.findRenderer(); // 同期処理にする
 }
 ```
 
 **理由:** `await` を使わない場合は `async` を削除する。
+
+---
+
+### 11. TFile の型チェックでエラー型を回避
+
+**エラー:**
+```
+'TFile' is an 'error' type that acts as 'any' and overrides all other types in this union type.
+```
+
+**修正前:**
+```typescript
+const linkDest = this.app.metadataCache.getFirstLinkpathDest(nodeId, '');
+if (linkDest instanceof TFile) return linkDest;
+```
+
+**修正後:**
+```typescript
+const linkDest = this.app.metadataCache.getFirstLinkpathDest(nodeId, '');
+if (linkDest) return linkDest; // TFileチェックを削除
+```
+
+**理由:** `getFirstLinkpathDest` の戻り値は `TFile | null` なので、`instanceof` チェックは不要。
+
+---
+
+### 12. 設定見出しにプラグイン名や "settings" を含めない
+
+**エラー:**
+```
+Avoid using "settings" in settings headings.
+Avoid including the plugin name in settings headings.
+```
+
+**修正前:**
+```typescript
+new Setting(containerEl)
+	.setName('Hadocommun settings')
+	.setHeading();
+```
+
+**修正後:**
+```typescript
+new Setting(containerEl)
+	.setName('General')
+	.setHeading();
+```
+
+**理由:** 設定画面は既にプラグイン名で識別されているため、見出しには一般的なカテゴリ名を使用する。
 
 ---
 
@@ -367,6 +414,8 @@ npx eslint plugin/main.ts plugin/src/**/*.ts
 - [ ] 見出しに Setting API を使用
 - [ ] 不要な `async` を削除
 - [ ] 未使用変数を削除または使用
+- [ ] TFile の不要な `instanceof` チェックを削除
+- [ ] 設定見出しにプラグイン名や "settings" を含めない
 
 ---
 
