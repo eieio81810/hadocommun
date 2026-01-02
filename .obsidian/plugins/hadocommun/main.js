@@ -37,6 +37,9 @@ var GraphLabelManager = class {
   }
   async getFirstH1(file) {
     var _a, _b;
+    if (file.extension === "canvas") {
+      return await this.getFirstH1FromCanvas(file);
+    }
     const cache = this.metadataCache.getFileCache(file);
     const cachedHeading = (_b = (_a = cache == null ? void 0 : cache.headings) == null ? void 0 : _a.find((h) => h.level === 1)) == null ? void 0 : _b.heading;
     if (cachedHeading)
@@ -50,7 +53,46 @@ var GraphLabelManager = class {
           return trimmed.substring(2).trim();
         }
       }
-    } catch (error) {
+    } catch (e) {
+    }
+    return null;
+  }
+  async getFirstH1FromCanvas(canvasFile) {
+    try {
+      const content = await this.vault.read(canvasFile);
+      const canvasData = JSON.parse(content);
+      if (!canvasData.nodes || !Array.isArray(canvasData.nodes)) {
+        return null;
+      }
+      for (const node of canvasData.nodes) {
+        if (node.type === "text" && node.text) {
+          const h1 = this.extractH1FromText(node.text);
+          if (h1)
+            return h1;
+        }
+      }
+      for (const node of canvasData.nodes) {
+        if (node.type === "file" && node.file) {
+          const referencedFile = this.vault.getAbstractFileByPath(node.file);
+          if (referencedFile && "path" in referencedFile) {
+            const h1 = await this.getFirstH1(referencedFile);
+            if (h1)
+              return h1;
+          }
+        }
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+  extractH1FromText(text) {
+    const lines = text.split("\n");
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (trimmed.startsWith("# ") && !trimmed.startsWith("## ")) {
+        return trimmed.substring(2).trim();
+      }
     }
     return null;
   }
@@ -106,28 +148,28 @@ var HadocommunPlugin = class extends import_obsidian.Plugin {
     this.addSettingTab(new HadocommunSettingTab(this.app, this));
     this.app.workspace.onLayoutReady(() => {
       if (this.settings.useH1ForGraphNodes) {
-        void this.handleLayoutChange();
+        this.handleLayoutChange();
         this.startLabelLoop();
       }
     });
     this.registerEvent(
       this.app.workspace.on("layout-change", () => {
         if (this.settings.useH1ForGraphNodes) {
-          void this.handleLayoutChange();
+          this.handleLayoutChange();
           this.startLabelLoop();
         }
       })
     );
     this.registerEvent(
       this.app.vault.on("modify", (file) => {
-        if (file instanceof import_obsidian.TFile && file.extension === "md") {
+        if (file instanceof import_obsidian.TFile && (file.extension === "md" || file.extension === "canvas")) {
           this.labelManager.invalidateFileCache(file.path);
         }
       })
     );
     this.registerEvent(
       this.app.vault.on("rename", (file, oldPath) => {
-        if (file instanceof import_obsidian.TFile && file.extension === "md") {
+        if (file instanceof import_obsidian.TFile && (file.extension === "md" || file.extension === "canvas")) {
           this.labelManager.invalidateFileCache(oldPath);
           this.labelManager.invalidateFileCache(file.path);
         }
@@ -144,7 +186,7 @@ var HadocommunPlugin = class extends import_obsidian.Plugin {
   async saveSettings() {
     await this.saveData(this.settings);
   }
-  async handleLayoutChange() {
+  handleLayoutChange() {
     this.currentRenderer = null;
     this.currentRenderer = this.findRenderer();
   }
@@ -203,11 +245,14 @@ var HadocommunPlugin = class extends import_obsidian.Plugin {
     const exact = this.app.vault.getAbstractFileByPath(nodeId);
     if (exact instanceof import_obsidian.TFile)
       return exact;
-    const withMd = this.app.vault.getAbstractFileByPath(nodeId.endsWith(".md") ? nodeId : `${nodeId}.md`);
-    if (withMd instanceof import_obsidian.TFile)
-      return withMd;
-    const linkDest = this.app.metadataCache.getFirstLinkpathDest(nodeId.replace(/\.md$/i, ""), "");
-    if (linkDest instanceof import_obsidian.TFile)
+    for (const ext of ["md", "canvas"]) {
+      const withExt = nodeId.endsWith(`.${ext}`) ? nodeId : `${nodeId}.${ext}`;
+      const withExtFile = this.app.vault.getAbstractFileByPath(withExt);
+      if (withExtFile instanceof import_obsidian.TFile)
+        return withExtFile;
+    }
+    const linkDest = this.app.metadataCache.getFirstLinkpathDest(nodeId.replace(/\.(md|canvas)$/i, ""), "");
+    if (linkDest)
       return linkDest;
     const byBase = this.app.vault.getMarkdownFiles().find((f) => f.basename === nodeId || f.path === nodeId || f.path.endsWith(`/${nodeId}`));
     return byBase != null ? byBase : null;
@@ -233,7 +278,7 @@ var HadocommunPlugin = class extends import_obsidian.Plugin {
         if (typeof textNode.updateText === "function") {
           try {
             textNode.updateText(true);
-          } catch (error) {
+          } catch (e) {
           }
         }
         textNode.dirty = true;
@@ -251,7 +296,7 @@ var HadocommunPlugin = class extends import_obsidian.Plugin {
         if (typeof textNode.updateText === "function") {
           try {
             textNode.updateText(true);
-          } catch (error) {
+          } catch (e) {
           }
         }
         textNode.dirty = true;
@@ -279,16 +324,16 @@ var HadocommunSettingTab = class extends import_obsidian.PluginSettingTab {
   display() {
     const { containerEl } = this;
     containerEl.empty();
-    new import_obsidian.Setting(containerEl).setName("Hadocommun settings").setHeading();
+    new import_obsidian.Setting(containerEl).setName("Appearance").setHeading();
     new import_obsidian.Setting(containerEl).setName("Greeting message").setDesc("メッセージ通知に表示される挨拶文").addText((text) => text.setPlaceholder("Enter your greeting").setValue(this.plugin.settings.greeting).onChange(async (value) => {
       this.plugin.settings.greeting = value;
       await this.plugin.saveSettings();
     }));
-    new import_obsidian.Setting(containerEl).setName("Use H1 for graph node labels").setDesc("グラフビューのノードラベルをファイル名ではなく、ファイルの最初のH1見出しで表示します").addToggle((toggle) => toggle.setValue(this.plugin.settings.useH1ForGraphNodes).onChange(async (value) => {
+    new import_obsidian.Setting(containerEl).setName("Use H1 for graph node labels").setDesc("Display the first H1 heading of each file as its label in graph view").addToggle((toggle) => toggle.setValue(this.plugin.settings.useH1ForGraphNodes).onChange(async (value) => {
       this.plugin.settings.useH1ForGraphNodes = value;
       await this.plugin.saveSettings();
       if (value) {
-        await this.plugin.handleLayoutChange();
+        this.plugin.handleLayoutChange();
         this.plugin.startLabelLoop();
         await this.plugin.updateGraphLabels();
       } else {

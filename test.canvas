@@ -1,0 +1,15 @@
+{
+	"nodes":[
+		{"id":"6ffb041c30df3ae0","x":-260,"y":99,"width":400,"height":400,"type":"file","file":"Setting_for_windows_user.md"},
+		{"id":"690ad244f11005cd","type":"text","text":"# canvas test","x":-120,"y":-220,"width":250,"height":60},
+		{"id":"fbfe5d530c817196","type":"text","text":"[[Setting_for_windows_user|Windows設定のお願い]]","x":20,"y":-80,"width":250,"height":60}
+	],
+	"edges":[
+		{"id":"b3edb730bec82547","fromNode":"690ad244f11005cd","fromSide":"bottom","toNode":"fbfe5d530c817196","toSide":"top"},
+		{"id":"c74616f75e198968","fromNode":"fbfe5d530c817196","fromSide":"bottom","toNode":"6ffb041c30df3ae0","toSide":"top"}
+	],
+	"metadata":{
+		"version":"1.0-1.0",
+		"frontmatter":{}
+	}
+}

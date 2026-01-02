@@ -11,24 +11,39 @@
             "id": "716354b93d885e8d",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "canvas",
               "state": {
-                "file": "README.md",
-                "mode": "source",
-                "source": false
+                "file": "test.canvas",
+                "viewState": {
+                  "x": 5,
+                  "y": 139.5,
+                  "zoom": 0
+                }
               },
-              "icon": "lucide-file",
-              "title": "README"
+              "icon": "lucide-layout-dashboard",
+              "title": "test"
             }
           }
         ]
       },
       {
-        "id": "601cdb5916268824",
+        "id": "4c609d2594587b6c",
         "type": "tabs",
         "children": [
           {
-            "id": "dcaed19ac201ac32",
+            "id": "c163470bfa6e5506",
+            "type": "leaf",
+            "pinned": true,
+            "state": {
+              "type": "full-calendar-view",
+              "state": {},
+              "pinned": true,
+              "icon": "calendar-glyph",
+              "title": "Calendar"
+            }
+          },
+          {
+            "id": "a5c92a473f90c37b",
             "type": "leaf",
             "pinned": true,
             "state": {
@@ -39,7 +54,8 @@
               "title": "グラフビュー"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -112,7 +128,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "README.md",
+                "file": "test.canvas",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -122,7 +138,7 @@
                 "unlinkedCollapsed": false
               },
               "icon": "links-coming-in",
-              "title": "READMEへのバックリンク"
+              "title": "testへのバックリンク"
             }
           },
           {
@@ -186,11 +202,11 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 300,
+    "collapsed": true
   },
   "left-ribbon": {
     "hiddenItems": {
-      "hadocommun-plugin:Hadocommun Plugin": false,
       "switcher:クイックスイッチャーを開く": false,
       "graph:グラフビューを開く": false,
       "canvas:新規キャンバスを作成": false,
@@ -199,20 +215,28 @@
       "command-palette:コマンドパレットを開く": false,
       "bases:Create new base": false,
       "markdown-importer:Markdownインポーターを開く": false,
-      "random-note:ランダムノートを開く": false
+      "random-note:ランダムノートを開く": false,
+      "obsidian-full-calendar:Open Full Calendar": false,
+      "hadocommun:Hadocommun": false
     }
   },
   "active": "716354b93d885e8d",
   "lastOpenFiles": [
+    "HADO_Motivation_Graph_Worksheet.md",
+    "Worksheet_Templates.md",
+    "calendar/2025-12-31 look back in this year.md",
+    "test.canvas",
+    "Setting_for_windows_user.md",
+    "Our_activities.md",
+    "Contributing.md",
     "Welcome.md",
     "README.md",
+    "calendar",
+    "Code_Review_Guide.md",
     "Markdown_knowhow.md",
-    "Contributing.md",
     "PR_Submission_Checklist.md",
     "Plugin_Release_Guide.md",
-    "Setting_for_windows_user.md",
     "Plugin_Development_Guide.md",
-    "無題のファイル.md",
     "2025-12-28.md",
     "無題のファイル.base"
   ]
