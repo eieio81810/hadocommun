@@ -89,7 +89,7 @@ export default class HadocommunPlugin extends Plugin {
 
 		this.registerEvent(
 			this.app.vault.on('modify', (file) => {
-				if (file instanceof TFile && file.extension === 'md') {
+				if (file instanceof TFile && (file.extension === 'md' || file.extension === 'canvas')) {
 					this.labelManager.invalidateFileCache(file.path);
 				}
 			})
@@ -97,7 +97,7 @@ export default class HadocommunPlugin extends Plugin {
 
 		this.registerEvent(
 			this.app.vault.on('rename', (file, oldPath) => {
-				if (file instanceof TFile && file.extension === 'md') {
+				if (file instanceof TFile && (file.extension === 'md' || file.extension === 'canvas')) {
 					this.labelManager.invalidateFileCache(oldPath);
 					this.labelManager.invalidateFileCache(file.path);
 				}
@@ -181,10 +181,17 @@ export default class HadocommunPlugin extends Plugin {
 	private resolveFileFromId(nodeId: string): TFile | null {
 		const exact = this.app.vault.getAbstractFileByPath(nodeId);
 		if (exact instanceof TFile) return exact;
-		const withMd = this.app.vault.getAbstractFileByPath(nodeId.endsWith('.md') ? nodeId : `${nodeId}.md`);
-		if (withMd instanceof TFile) return withMd;
-		const linkDest = this.app.metadataCache.getFirstLinkpathDest(nodeId.replace(/\.md$/i, ''), '');
+		
+		// .md または .canvas 拡張子を追加して試行
+		for (const ext of ['md', 'canvas']) {
+			const withExt = nodeId.endsWith(`.${ext}`) ? nodeId : `${nodeId}.${ext}`;
+			const withExtFile = this.app.vault.getAbstractFileByPath(withExt);
+			if (withExtFile instanceof TFile) return withExtFile;
+		}
+		
+		const linkDest = this.app.metadataCache.getFirstLinkpathDest(nodeId.replace(/\.(md|canvas)$/i, ''), '');
 		if (linkDest) return linkDest;
+		
 		const byBase = this.app.vault.getMarkdownFiles().find(f => f.basename === nodeId || f.path === nodeId || f.path.endsWith(`/${nodeId}`));
 		return byBase ?? null;
 	}

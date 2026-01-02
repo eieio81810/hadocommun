@@ -8,6 +8,7 @@ const mockMetadataCache = {
 
 const mockVault = {
 	read: jest.fn(),
+	getAbstractFileByPath: jest.fn(),
 } as unknown as Vault;
 
 describe('GraphLabelManager', () => {
@@ -128,6 +129,94 @@ describe('GraphLabelManager', () => {
 			const result = await manager.getH1ForNode('test.md', mockResolveFile);
 			expect(result).toBe('New Title');
 			expect(mockResolveFile).toHaveBeenCalledTimes(2);
+		});
+	});
+
+	describe('Canvas file support', () => {
+		it('should extract text from canvas text node', async () => {
+			const mockFile = { path: 'test.canvas', extension: 'canvas' } as TFile;
+			const canvasContent = JSON.stringify({
+				nodes: [
+					{ id: 'node1', type: 'text', text: '# Canvas Title' },
+				],
+			});
+			(mockVault.read as jest.Mock).mockResolvedValue(canvasContent);
+
+			const result = await manager.getFirstH1(mockFile);
+			expect(result).toBe('Canvas Title');
+		});
+
+		it('should return null for canvas with no H1 text node', async () => {
+			const mockFile = { path: 'test.canvas', extension: 'canvas' } as TFile;
+			const canvasContent = JSON.stringify({
+				nodes: [
+					{ id: 'node1', type: 'text', text: '## H2 Only' },
+				],
+			});
+			(mockVault.read as jest.Mock).mockResolvedValue(canvasContent);
+
+			const result = await manager.getFirstH1(mockFile);
+			expect(result).toBeNull();
+		});
+
+		it('should handle canvas file node referencing markdown file', async () => {
+			const mockCanvasFile = { path: 'test.canvas', extension: 'canvas' } as TFile;
+			const mockMdFile = { path: 'referenced.md', extension: 'md' } as TFile;
+			
+			const canvasContent = JSON.stringify({
+				nodes: [
+					{ id: 'fileNode', type: 'file', file: 'referenced.md' },
+				],
+			});
+			
+			(mockVault.read as jest.Mock).mockImplementation((file: TFile) => {
+				if (file.path === 'test.canvas') {
+					return Promise.resolve(canvasContent);
+				}
+				if (file.path === 'referenced.md') {
+					return Promise.resolve('# Referenced Title\n\nContent');
+				}
+				return Promise.reject(new Error('File not found'));
+			});
+
+			(mockVault.getAbstractFileByPath as jest.Mock).mockImplementation((path: string) => {
+				if (path === 'referenced.md') return mockMdFile;
+				return null;
+			});
+
+			(mockMetadataCache.getFileCache as jest.Mock).mockReturnValue(null);
+
+			const mockResolveFile = jest.fn((id: string) => {
+				if (id === 'test.canvas') return mockCanvasFile;
+				if (id === 'referenced.md') return mockMdFile;
+				return null;
+			});
+
+			const result = await manager.getH1ForNode('test.canvas', mockResolveFile);
+			expect(result).toBe('Referenced Title');
+		});
+
+		it('should handle invalid canvas JSON gracefully', async () => {
+			const mockFile = { path: 'invalid.canvas', extension: 'canvas' } as TFile;
+			(mockVault.read as jest.Mock).mockResolvedValue('invalid json');
+
+			const result = await manager.getFirstH1(mockFile);
+			expect(result).toBeNull();
+		});
+
+		it('should extract first H1 from multiple text nodes in canvas', async () => {
+			const mockFile = { path: 'test.canvas', extension: 'canvas' } as TFile;
+			const canvasContent = JSON.stringify({
+				nodes: [
+					{ id: 'node1', type: 'text', text: 'No heading' },
+					{ id: 'node2', type: 'text', text: '# First Title' },
+					{ id: 'node3', type: 'text', text: '# Second Title' },
+				],
+			});
+			(mockVault.read as jest.Mock).mockResolvedValue(canvasContent);
+
+			const result = await manager.getFirstH1(mockFile);
+			expect(result).toBe('First Title');
 		});
 	});
 });
