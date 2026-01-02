@@ -99,6 +99,13 @@ npm run test:watch    # ウォッチモード
 npm run test:coverage # カバレッジレポート
 ```
 
+### Lint
+
+```bash
+npm run lint      # Obsidian ESLintルールでコードをチェック
+npm run lint:fix  # 可能な限り自動修正
+```
+
 詳細については、[plugin/README.md](plugin/README.md) および [docs/Plugin_Development_Guide.md](docs/Plugin_Development_Guide.md) を参照してください。
 
 ## 🤝 コントリビューション

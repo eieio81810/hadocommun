@@ -311,6 +311,7 @@ if (linkDest) return linkDest; // TFileチェックを削除
 ```
 Avoid using "settings" in settings headings.
 Avoid including the plugin name in settings headings.
+Avoid using a "General" heading in settings.
 ```
 
 **修正前:**
@@ -318,16 +319,26 @@ Avoid including the plugin name in settings headings.
 new Setting(containerEl)
 	.setName('Hadocommun settings')
 	.setHeading();
-```
 
-**修正後:**
-```typescript
+// または
 new Setting(containerEl)
 	.setName('General')
 	.setHeading();
 ```
 
-**理由:** 設定画面は既にプラグイン名で識別されているため、見出しには一般的なカテゴリ名を使用する。
+**修正後:**
+```typescript
+new Setting(containerEl)
+	.setName('Appearance')
+	.setHeading();
+
+// または機能に応じた具体的な名前
+new Setting(containerEl)
+	.setName('Graph view')
+	.setHeading();
+```
+
+**理由:** 設定画面は既にプラグイン名で識別されているため、見出しには機能別の具体的なカテゴリ名を使用する。"General" も避け、より具体的な見出しを使用すること。
 
 ---
 
@@ -358,44 +369,89 @@ new Setting(containerEl)
 
 ## 🛠️ ローカルでのチェック方法
 
-### 1. ESLint プラグインのインストール
+### Obsidian公式ESLintプラグインを使用（推奨）
+
+Obsidianの自動コードレビューと同じルールをローカルで実行できます。
+
+#### 1. 依存関係のインストール
 
 ```bash
 cd plugin
-npm install --save-dev @typescript-eslint/eslint-plugin @typescript-eslint/parser eslint
+npm install --save-dev eslint eslint-plugin-obsidianmd @typescript-eslint/parser @typescript-eslint/utils cross-env
 ```
 
-### 2. `.eslintrc.json` の作成
+#### 2. ESLint設定ファイルの作成
+
+`plugin/eslint.config.mjs`:
+
+```javascript
+// eslint.config.mjs
+import tsparser from "@typescript-eslint/parser";
+import obsidianmd from "eslint-plugin-obsidianmd";
+
+export default [
+	{
+		files: ["**/*.ts"],
+		plugins: {
+			obsidianmd,
+		},
+		languageOptions: {
+			parser: tsparser,
+			parserOptions: {
+				ecmaVersion: 2020,
+				sourceType: "module",
+			},
+		},
+		rules: {
+			// Obsidian plugin rules
+			"obsidianmd/commands/no-plugin-id-in-command-id": "error",
+			"obsidianmd/settings-tab/no-manual-html-headings": "error",
+			"obsidianmd/settings-tab/no-problematic-settings-headings": "error",
+			"obsidianmd/ui/sentence-case": [
+				"warn",
+				{
+					allowAutoFix: true,
+					enforceCamelCaseLower: false,
+				},
+			],
+			"obsidianmd/no-sample-code": "warn",
+		},
+	},
+	{
+		ignores: [
+			"main.js",
+			"*.d.ts",
+			"node_modules/**",
+			"tests/**",
+		],
+	},
+];
+```
+
+#### 3. package.jsonにスクリプトを追加
 
 ```json
 {
-	"root": true,
-	"parser": "@typescript-eslint/parser",
-	"env": { "node": true },
-	"plugins": ["@typescript-eslint"],
-	"extends": [
-		"eslint:recommended",
-		"plugin:@typescript-eslint/eslint-recommended",
-		"plugin:@typescript-eslint/recommended"
-	],
-	"parserOptions": {
-		"sourceType": "module"
-	},
-	"rules": {
-		"no-unused-vars": "off",
-		"@typescript-eslint/no-unused-vars": ["error", { "args": "none" }],
-		"@typescript-eslint/ban-ts-comment": "off",
-		"no-prototype-builtins": "off",
-		"@typescript-eslint/no-empty-function": "off"
-	}
+  "scripts": {
+    "lint": "cross-env ESLINT_USE_FLAT_CONFIG=true eslint .",
+    "lint:fix": "cross-env ESLINT_USE_FLAT_CONFIG=true eslint . --fix"
+  }
 }
 ```
 
-### 3. ESLint の実行
+#### 4. ESLintの実行
 
 ```bash
-npx eslint plugin/main.ts plugin/src/**/*.ts
+# 問題をチェック
+npm run lint
+
+# 自動修正可能な問題を修正
+npm run lint:fix
 ```
+
+### TypeScript型チェックでのエラーについて
+
+TypeScript 5.2以上を使用している場合、型情報を必要とする一部のルール（`prefer-file-manager-trash-file`, `no-tfile-tfolder-cast` など）でエラーが発生する可能性があります。これらのルールは、Obsidianの自動レビューで検証されるため、ローカルでは基本的なルールのみをチェックすることをお勧めします。
 
 ---
 

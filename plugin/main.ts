@@ -266,7 +266,7 @@ class HadocommunSettingTab extends PluginSettingTab {
 		containerEl.empty();
 
 		new Setting(containerEl)
-			.setName('General')
+			.setName('Appearance')
 			.setHeading();
 
 		new Setting(containerEl)
